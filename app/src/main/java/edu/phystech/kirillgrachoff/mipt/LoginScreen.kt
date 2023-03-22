@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
@@ -71,7 +72,7 @@ fun AppIcon() {
             .fillMaxWidth(),
         contentAlignment = Alignment.BottomCenter,
     ) {
-        //
+        Icon(painterResource(R.drawable.logo), "Logo", Modifier.width(160.dp).height(160.dp))
     }
 }
 
