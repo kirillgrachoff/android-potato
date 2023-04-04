@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">mipt_study</string>
+    <string name="LoginPassword">Password</string>
+    <string name="LoginEmail">Email</string>
+    <string name="HidePassword">Hide password</string>
+    <string name="ShowPassword">Show password</string>
+    <string name="LoginTopString">Login to Your Account</string>
+    <string name="LoginButton">Login</string>
+    <string name="ForgotPassword">forgot your password?</string>
 </resources>

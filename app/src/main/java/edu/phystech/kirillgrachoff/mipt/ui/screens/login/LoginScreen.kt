@@ -1,18 +1,13 @@
-package edu.phystech.kirillgrachoff.mipt
+package edu.phystech.kirillgrachoff.mipt.ui.screens.login
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.ButtonDefaults.buttonColors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -22,9 +17,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 import edu.phystech.kirillgrachoff.mipt.ui.theme.Mipt_studyTheme
+import edu.phystech.kirillgrachoff.mipt.ui.viewmodels.login.LoginViewModel
+
+import androidx.lifecycle.viewmodel.compose.viewModel
+import edu.phystech.kirillgrachoff.mipt.R
+import edu.phystech.kirillgrachoff.mipt.ui.viewmodels.login.LoginAction
+import edu.phystech.kirillgrachoff.mipt.ui.viewmodels.login.LoginUiState
+import edu.phystech.kirillgrachoff.mipt.ui.viewmodels.login.*
 
 @Composable
-fun LoginScreen() {
+fun LoginScreen(
+    loginViewModel: LoginViewModel = viewModel()
+) {
+    val loginUiState by loginViewModel.uiState.collectAsState()
+    val doAction = { action: LoginAction -> loginViewModel.confirm(action) }
     Mipt_studyTheme {
         Box(
             Modifier
@@ -32,20 +38,19 @@ fun LoginScreen() {
                 .fillMaxHeight(),
             contentAlignment = Alignment.Center,
         ) {
-            LoginScreenImpl()
+            LoginScreenImpl(
+                loginUiState,
+                doAction,
+            )
         }
     }
 }
 
 @Composable
-fun LoginScreenImpl() {
-    val email = remember {
-        mutableStateOf( "" )
-    }
-
-    val password = remember {
-        mutableStateOf("")
-    }
+fun LoginScreenImpl(
+    loginUiState: LoginUiState,
+    doAction: (LoginAction) -> Unit,
+) {
 
     Column(
         modifier = Modifier.fillMaxHeight(),
@@ -54,12 +59,13 @@ fun LoginScreenImpl() {
     ) {
         AppIcon()
         EmailPasswordFields(
-            email = email,
-            password = password,
+            email = loginUiState.login,
+            password = loginUiState.password,
+            visible = loginUiState.passwordVisible,
+            doAction = doAction,
         )
         ButtonLogin(
-            email = email,
-            password = password,
+            doAction = doAction,
         )
     }
 }
@@ -72,30 +78,33 @@ fun AppIcon() {
             .fillMaxWidth(),
         contentAlignment = Alignment.BottomCenter,
     ) {
-        Icon(painterResource(R.drawable.logo), "Logo", Modifier.width(160.dp).height(160.dp))
+        Icon(painterResource(R.drawable.logo), "Logo",
+            Modifier
+                .width(160.dp)
+                .height(160.dp))
     }
 }
 
 @Composable
-fun ButtonLogin(email: MutableState<String>, password: MutableState<String>) {
+fun ButtonLogin(doAction: (LoginAction) -> Unit) {
     Column(
         Modifier.height(120.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Button(
-            { TODO("Forgot password") },
+            { doAction(ForgotPassword) },
             colors = buttonColors(
                 backgroundColor = Color(0, 0, 0, 0)
             ),
             elevation = null,
         ) {
             Text(
-                "forgot your password?",
+                R.string.ForgotPassword.toString(),
                 fontSize = 13.sp,
             )
         }
         Button(
-            { TODO("No runtime") },
+            { doAction(Login) },
             colors = buttonColors(
                 backgroundColor = Color(0, 1, 0, 0x40)
             )
@@ -106,68 +115,71 @@ fun ButtonLogin(email: MutableState<String>, password: MutableState<String>) {
 }
 
 @Composable
-fun EmailPasswordFields(email: MutableState<String>, password: MutableState<String>) {
+fun EmailPasswordFields(email: String, password: String, visible: Boolean, doAction: (LoginAction) -> Unit) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text("Login to Your Account")
+        Text(R.string.LoginTopString.toString())
         EmailField(
             email = email,
+            doAction = doAction,
         )
         PasswordField(
             password = password,
+            visible = visible,
+            doAction = doAction,
         )
     }
 }
 
 @Composable
-fun EmailField(email: MutableState<String>, modifier: Modifier = Modifier) {
+fun EmailField(email: String, doAction: (LoginAction) -> Unit, modifier: Modifier = Modifier) {
     TextField(
-        value = email.value,
-        onValueChange = { email.value = it },
+        value = email,
+        onValueChange = { doAction(UpdateLogin(it)) },
         label = {
-            Text("Email")
+            Text(R.string.LoginEmail.toString())
         },
         leadingIcon = {
-            Icon(Icons.Filled.Email, "Email")
+            Icon(Icons.Filled.Email, R.string.LoginEmail.toString())
         },
         modifier = modifier
     )
 }
 
 @Composable
-fun PasswordField(password: MutableState<String>, modifier: Modifier = Modifier) {
-    val passwordVisible = remember {
-        mutableStateOf(false)
-    }
+fun PasswordField(password: String, visible: Boolean, doAction: (LoginAction) -> Unit, modifier: Modifier = Modifier) {
     TextField(
-        value = password.value,
-        onValueChange = { password.value = it },
+        value = password,
+        onValueChange = { doAction(UpdatePassword(it)) },
         label = {
-            Text("Password")
+            Text(R.string.LoginPassword.toString())
         },
         leadingIcon = {
-            Icon(imageVector = Icons.Filled.Lock, contentDescription = "Password")
+            Icon(
+                imageVector = Icons.Filled.Lock,
+                contentDescription = R.string.LoginPassword.toString()
+            )
         },
-        visualTransformation = if (passwordVisible.value) {
+        visualTransformation = if (visible) {
             VisualTransformation.None
         } else {
             PasswordVisualTransformation()
         },
         trailingIcon = {
-            val image = if (passwordVisible.value) {
+            val image = if (visible) {
                 Icons.Filled.Visibility
             } else {
                 Icons.Filled.VisibilityOff
             }
-            val description = if (passwordVisible.value) {
-                "Hide password"
+            val description = if (visible) {
+                R.string.HidePassword.toString()
             } else {
-                "Show password"
+                R.string.ShowPassword.toString()
             }
 
             IconButton({
-                passwordVisible.value = !passwordVisible.value
+                doAction(ChangePasswordVisibility())
             }) {
                 Icon(image, description)
             }
