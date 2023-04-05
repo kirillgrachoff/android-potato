@@ -30,5 +30,5 @@ data class CatalogResponse(
     @SerialName("popular")
     val popular: List<Place>,
     @SerialName("commercial")
-    val advertisement: Commercial,
+    val commercial: Commercial,
 )

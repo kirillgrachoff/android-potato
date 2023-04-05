@@ -1,43 +1,38 @@
 package edu.phystech.kirillgrachoff.mipt.ui.viewmodels.places
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 data class ListUiState(
-    val catalog: CatalogResponse
+    val nearest: List<Place> = emptyList(),
+    val popular: List<Place> = emptyList(),
+    val commercial: Commercial? = null,
 )
 
-interface ListEvent {
-    suspend fun prepare()
-    val update: (ListUiState) -> ListUiState
-}
+//interface ListEvent {
+//    suspend fun prepare()
+//    val update: (ListUiState) -> ListUiState
+//}
 
-class InitialDraw: ListEvent {
-    private var catalog: CatalogResponse? = null
-    private val client: Client = Client()
-
-    override suspend fun prepare() {
-        catalog = client.get()
-    }
-
-    override val update: (ListUiState) -> ListUiState
-        get() = {
-            ListUiState(this.catalog!!)
-        }
-}
-
-class ListViewModel : ViewModel() {
+@HiltViewModel
+class ListViewModel @Inject constructor(private val placesClient: Client) : ViewModel() {
     private val _uiState = MutableStateFlow(ListUiState())
     val uiState = _uiState.asStateFlow()
 
-    private suspend fun handle(event: ListEvent) {
-        event.prepare()
-        _uiState.update(event.update)
-    }
-
-    val handler: suspend (ListEvent) -> Unit = {
-        handle(it)
+    init {
+        viewModelScope.launch {
+            launch(Dispatchers.IO) {
+                val catalog = placesClient.get()
+                with (catalog) {
+                    _uiState.emit(ListUiState(nearest, popular, commercial))
+                }
+            }
+        }
     }
 }
