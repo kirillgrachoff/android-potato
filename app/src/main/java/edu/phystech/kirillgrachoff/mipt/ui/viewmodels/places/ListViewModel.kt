@@ -18,9 +18,9 @@ class ListViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(ListUiState())
     val uiState = _uiState.asStateFlow()
 
-    suspend fun confirm(action: ListEvent) {
-        action.prepare()
-        _uiState.update(action.update)
+    suspend fun confirm(event: ListEvent) {
+        event.prepare()
+        _uiState.update(event.update)
     }
 
     val handler: suspend (ListEvent) -> Unit = {
