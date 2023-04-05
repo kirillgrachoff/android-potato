@@ -14,6 +14,20 @@ interface ListEvent {
     val update: (ListUiState) -> ListUiState
 }
 
+class InitialDraw: ListEvent {
+    private var catalog: CatalogResponse? = null
+    private val client: Client = Client()
+
+    override suspend fun prepare() {
+        catalog = client.get()
+    }
+
+    override val update: (ListUiState) -> ListUiState
+        get() = {
+            ListUiState(this.catalog!!)
+        }
+}
+
 class ListViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(ListUiState())
     val uiState = _uiState.asStateFlow()
