@@ -21,7 +21,7 @@ data class ListUiState(
 //}
 
 @HiltViewModel
-class ListViewModel @Inject constructor(private val placesClient: Client) : ViewModel() {
+class PlacesViewModel @Inject constructor(val placesClient: Client) : ViewModel() {
     private val _uiState = MutableStateFlow(ListUiState())
     val uiState = _uiState.asStateFlow()
 
