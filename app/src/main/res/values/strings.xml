@@ -7,4 +7,5 @@
     <string name="LoginTopString">Login to Your Account</string>
     <string name="LoginButton">Login</string>
     <string name="ForgotPassword">forgot your password?</string>
+    <string name="endpoint_url">195.2.84.138:8081</string>
 </resources>
